@@ -5,7 +5,6 @@ import argparse
 import time
 import detect_utils
 
-
 # # construct the argument parser
 # parser = argparse.ArgumentParser()
 # parser.add_argument('-i', '--input', help='path to input video')
@@ -13,7 +12,8 @@ import detect_utils
 # define the computation device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # load the model
-model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn(pretrained=True, pretrained_backbone=False)
+# model = torchvision.models.mobilenet_v3_small(pretrained=True)
+model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_320_fpn(pretrained=True, pretrained_backbone=False)
 # model = torch.jit.script(model)
 # model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True, force_reload=True)
 # model.conf = 0.5  # confidence threshold (0-1)
@@ -37,41 +37,52 @@ out = cv2.VideoWriter(f"{save_name}.mp4",
 frame_count = 0  # to count total frames
 total_fps = 0  # to get the final frames per second
 
+img_counter = 0
+frame_set = []
+start_time = time.time()
+
 # read until end of video
 while cap.isOpened():
-	# capture each frame of the video
-	ret, frame = cap.read()
-	if ret:
-		# get the start time
-		start_time = time.time()
-		with torch.no_grad():
-			# get predictions for the current frame
-			boxes, classes, labels = detect_utils.predict(frame, model, device, 0.5)
+	if time.time() - start_time >= 1:  # <---- Check if 5 sec passed
+		# capture each frame of the video
+		ret, frame = cap.read()
+		if ret:
+			# get the start time
+			start_time = time.time()
+			with torch.no_grad():
+				# get predictions for the current frame
+				boxes, classes, labels = detect_utils.predict(frame, model, device, 0.5)
 
-		# draw boxes and show current frame on screen
-		image = detect_utils.draw_boxes(boxes, classes, labels, frame)
-		# get the end time
-		end_time = time.time()
-		# get the fps
-		fps = 1 / (end_time - start_time)
-		# add fps to total fps
-		total_fps += fps
-		# increment frame count
-		frame_count += 1
-		# write the FPS on the current frame
-		cv2.putText(image, f"{fps:.3f} FPS", (15, 30), cv2.FONT_HERSHEY_SIMPLEX,
-		            0.5, (0, 255, 0), 2
-		            )
-		# press `q` to exit
-		wait_time = max(1, int(fps / 4))
-		# convert from BGR to RGB color format
-		image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-		cv2.imshow('image', image)
-		out.write(image)
-		if cv2.waitKey(wait_time) & 0xFF == ord('q'):
+			# draw boxes and show current frame on screen
+			image = detect_utils.draw_boxes(boxes, classes, labels, frame)
+			# get the end time
+			end_time = time.time()
+			# get the fps
+			fps = 1 / (end_time - start_time)
+			# add fps to total fps
+			total_fps += fps
+			# increment frame count
+			frame_count += 1
+			# write the FPS on the current frame
+			cv2.putText(image, f"{fps:.3f} FPS", (15, 30), cv2.FONT_HERSHEY_SIMPLEX,
+			            0.5, (0, 255, 0), 2
+			            )
+			# press `q` to exit
+			wait_time = max(1, int(fps / 4))
+			# convert from BGR to RGB color format
+			image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+			cv2.imshow('image', image)
+			out.write(image)
+			if cv2.waitKey(wait_time) & 0xFF == ord('q'):
+				break
+
+			# img_name = "opencv_frame_{}.png".format(img_counter)
+			# cv2.imwrite(img_name, image)
+			# print("{} written!".format(img_counter))
+			start_time = time.time()
+		else:
 			break
-	else:
-		break
+		img_counter += 1
 
 # release VideoCapture()
 cap.release()
