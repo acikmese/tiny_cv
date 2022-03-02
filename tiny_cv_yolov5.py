@@ -11,7 +11,7 @@ np.random.seed(1)
 # Time interval for taking shots.
 time_interval = 0  # in seconds
 # Model detection threshold.
-threshold = 0.5
+threshold = 0.4
 # Set device.
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Create model.
@@ -55,6 +55,7 @@ while cap.isOpened():
 		results = outputs.pandas().xyxy[0]
 		labels = results['class'].values.tolist()
 		classes = results['name'].values.tolist()
+		scores = results['confidence'].values.tolist()
 		boxes = results.iloc[:, :4].values
 
 		# Convert frame from BGR to RGB color format.
@@ -71,7 +72,7 @@ while cap.isOpened():
 				color, 1
 			)
 			# Put class name on box.
-			cv2.putText(frame, classes[i], (int(box[0]), int(box[1] - 5)),
+			cv2.putText(frame, f"{classes[i]}: {scores[i]:.2f}", (int(box[0]), int(box[1] - 5)),
 			            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 1,
 			            lineType=cv2.LINE_AA
 			            )
