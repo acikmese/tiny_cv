@@ -74,7 +74,7 @@ while cap.isOpened():
 				color, 1
 			)
 			# Put class name on box.
-			cv2.putText(frame, classes[i], (int(box[0]), int(box[1] - 5)),
+			cv2.putText(frame, f"{classes[i]}: {scores[i]:.2f}", (int(box[0]), int(box[1] - 5)),
 			            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 1,
 			            lineType=cv2.LINE_AA
 			            )
