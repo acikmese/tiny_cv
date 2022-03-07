@@ -126,7 +126,7 @@ while True:
 			if not os.path.isfile(TXT_PATH) or os.stat(TXT_PATH).st_size == 0:
 				with open(TXT_PATH, 'a') as f:
 					out_txt = f"timestamp,frame_id,id_type,id,confidence,bbox_left,bbox_top,bbox_w,bbox_h," \
-								f"avg_distance,min_distance,max_distance"
+								f"avg_distance,min_distance,max_distance\n"
 					f.write(out_txt)
 
 			# to MOT format
