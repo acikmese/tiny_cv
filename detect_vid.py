@@ -43,7 +43,8 @@ start_time = time.time()
 
 # read until end of video
 while cap.isOpened():
-	if time.time() - start_time >= 1:  # <---- Check if 5 sec passed
+	# if time.time() - start_time >= 1:  # <---- Check if 5 sec passed
+	if 1 > 0:
 		# capture each frame of the video
 		ret, frame = cap.read()
 		if ret:
